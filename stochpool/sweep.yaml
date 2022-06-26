@@ -1,0 +1,14 @@
+program: "stochpool/sweep.py"
+entity: "animeshsinha1309"
+project: "gnn-pooling"
+method: grid
+metric:
+  goal: minimize
+  name: "val_loss"
+parameters:
+  model:
+    values: ["diffpool", "mincutpool"]
+  dataset:
+    values: ["proteins", "enzymes", "nci1", "nci109"]
+  epochs:
+    values: [20]
