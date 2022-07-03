@@ -40,7 +40,6 @@ def train_graph_classification_inductive(
                     torch.nn.functional.nll_loss(pred, data.y.view(-1))
                     + additional_loss
                 )
-                print(loss)
                 loss.backward()
                 loss_all += data.y.size(0) * float(loss)
                 optimizer.step()
