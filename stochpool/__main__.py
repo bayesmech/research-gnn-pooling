@@ -15,20 +15,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dataset",
         default="proteins",
-        help="which dataset to use (proteins, enzymes, nci1, nci109, etc.)"
+        help="which dataset to use (proteins, enzymes, nci1, nci109, etc.)",
     )
     parser.add_argument(
-        "--epochs",
-        default=200,
-        type=int,
-        help="number of epochs to train for"
+        "--epochs", default=200, type=int, help="number of epochs to train for"
     )
     parser.add_argument(
         "--wandb",
         action="store_const",
         default=False,
         const=True,
-        help="should wandb be used for logging the current run?"
+        help="should wandb be used for logging the current run?",
     )
     args = parser.parse_args()
 

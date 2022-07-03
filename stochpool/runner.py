@@ -5,6 +5,7 @@ from stochpool.engine.trainer import train_graph_classification_inductive
 from stochpool.models.mincut_pool import MinCutPooledConvolutionalNetwork
 from stochpool.models.diff_pool import DiffPooledConvolutionalNetwork
 from stochpool.analyzers.wandb import WandBLogger
+from stochpool.models.stoch_pool import StochPooledConvolutionalNetwork
 
 
 def main(model: str, dataset: str, epochs: int, use_wandb: bool):
@@ -41,12 +42,19 @@ def main(model: str, dataset: str, epochs: int, use_wandb: bool):
         )
 
     if model == "diffpool":
-        model = DiffPooledConvolutionalNetwork(df.num_features, df.num_classes).to(device)
+        model = DiffPooledConvolutionalNetwork(df.num_features, df.num_classes).to(
+            device
+        )
     elif model == "mincutpool":
-        model = MinCutPooledConvolutionalNetwork(df.num_features, df.num_classes).to(device)
+        model = MinCutPooledConvolutionalNetwork(df.num_features, df.num_classes).to(
+            device
+        )
+    elif model == "stochpool":
+        model = StochPooledConvolutionalNetwork(df.num_features, df.num_classes).to(
+            device
+        )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=5e-4, weight_decay=1e-4)
-
     analyzer = WandBLogger(activated=use_wandb)
 
     train_graph_classification_inductive(

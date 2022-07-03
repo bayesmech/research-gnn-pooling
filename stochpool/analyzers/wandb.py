@@ -2,7 +2,6 @@ import wandb
 
 
 class WandBLogger:
-
     def __init__(self, activated=True):
         self.activated = activated
 
