@@ -27,6 +27,24 @@ if __name__ == "__main__":
         const=True,
         help="should wandb be used for logging the current run?",
     )
+    parser.add_argument(
+        "--per-batch-iters",
+        default=1,
+        type=int,
+        help="Number of iterations for which to accumulate gradient of a single batch"
+    )
+    parser.add_argument(
+        "--accumulate_grad_batches",
+        default=1,
+        type=int,
+        help="Number of batches to accumulate gradients over",
+    )
+    parser.add_argument(
+        "--seed",
+        default=42,
+        type=int,
+        help="Seed for everything including datasets shuffle"
+    )
     args = parser.parse_args()
 
     if args.wandb:
@@ -41,4 +59,4 @@ if __name__ == "__main__":
             ),
             resume=False,
         )
-    main(args.model, args.dataset, args.epochs, use_wandb=args.wandb)
+    main(args, use_wandb=args.wandb)
