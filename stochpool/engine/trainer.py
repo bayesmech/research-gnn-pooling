@@ -21,8 +21,6 @@ def train_graph_classification_inductive(
     seed: int,
 ):
 
-    history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
-
     optimizer.zero_grad()
     global_step = 0
     for epoch in range(epochs):
@@ -89,10 +87,6 @@ def train_graph_classification_inductive(
 
         train_loss = loss_all.avg
         train_acc = accuracy_all.avg
-        history["train_loss"].append(train_loss)
-        history["train_acc"].append(train_acc)
-        history["train_classification_loss"].append(classification_loss_all.avg)
-        history["train_additional_loss"].append(additional_loss_all.avg)
 
         val_accuracy_all = AverageMeter()
         val_loss_all = AverageMeter()
@@ -126,12 +120,10 @@ def train_graph_classification_inductive(
                         loss = classification_loss + additional_loss
 
                         iter_loss.update(loss.item(), n=1)
-                        iter_pred.update(iter_pred.detach(), n=1)
+                        iter_pred.update(pred.detach(), n=1)
 
                         iter_additional_loss.update(additional_loss.item(), n=1)
                         iter_classification_loss.update(classification_loss.item(), n=1)
-
-                        
 
                     val_loss_all.update(iter_loss.avg, n=data.y.size(0))
                     acc = (
@@ -142,8 +134,12 @@ def train_graph_classification_inductive(
                     )
                     val_accuracy_all.update(acc, n=data.y.size(0))
 
-                    val_additional_loss_all.update(iter_additional_loss.avg, n=data.y.size(0))
-                    val_classification_loss_all.update(iter_classification_loss.avg, n=data.y.size(0))
+                    val_additional_loss_all.update(
+                        iter_additional_loss.avg, n=data.y.size(0)
+                    )
+                    val_classification_loss_all.update(
+                        iter_classification_loss.avg, n=data.y.size(0)
+                    )
 
                     # correct += int(pred.max(dim=1)[1].eq(data.y.view(-1)).sum())
                     # examples += data.y.size(0)
@@ -154,10 +150,6 @@ def train_graph_classification_inductive(
 
         val_loss = val_loss_all.avg
         val_acc = val_accuracy_all.avg
-        history["val_loss"].append(val_loss)
-        history["val_acc"].append(val_acc)
-        history["val_classification_loss"].append(val_classification_loss_all.avg)
-        history["val_additional_loss"].append(val_additional_loss_all.avg)
 
         analyzer.log(
             {
@@ -171,5 +163,3 @@ def train_graph_classification_inductive(
                 "val_additional_loss": val_additional_loss_all.avg,
             }
         )
-
-    return history
