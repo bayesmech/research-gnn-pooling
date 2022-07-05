@@ -14,7 +14,7 @@ class StochPool(torch.nn.Module):
         edge_index: torch.Tensor,
         batch_ptr: torch.Tensor,
         edge_weight: typing.Optional[torch.Tensor] = None,
-        normalize: bool = True,
+        normalize: typing.Optional[bool] = True,
     ) -> typing.Tuple[
         torch.Tensor,
         torch.Tensor,
@@ -35,7 +35,7 @@ class StochPool(torch.nn.Module):
         """
         num_batches = batch_ptr.size(0) - 1
         s = self.pooling_net(
-            x
+            x, edge_index
         )  # tensor of shape (num_nodes_in_batched_graph, num_output_pools)
         num_pools_per_graph = s.size(1)
         s = torch.nn.functional.gumbel_softmax(s, hard=True, dim=-1)

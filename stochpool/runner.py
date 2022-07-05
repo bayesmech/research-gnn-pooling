@@ -8,7 +8,7 @@ from stochpool.engine.trainer import train_graph_classification_inductive
 from stochpool.models.mincut_pool import MinCutPooledConvolutionalNetwork
 from stochpool.models.diff_pool import DiffPooledConvolutionalNetwork
 from stochpool.analyzers.wandb import WandBLogger
-from stochpool.models.stoch_pool import StochPooledConvolutionalNetwork
+from stochpool.models.stoch_pool import GraphPooledConvolutionalNetwork
 
 
 def main(args: argparse.Namespace, use_wandb: bool):
@@ -53,9 +53,13 @@ def main(args: argparse.Namespace, use_wandb: bool):
             device
         )
     elif args.model == "stochpool":
-        model = StochPooledConvolutionalNetwork(df.num_features, df.num_classes).to(
-            device
-        )
+        model = GraphPooledConvolutionalNetwork(
+            in_channels=df.num_features,
+            out_channels=df.num_classes,
+            conv_channels=[8, 16, 32],
+            n_clusters=[20, 10, 5],
+            pool_after=2,
+        ).to(device)
     else:
         raise NotImplementedError("This model is not supported.")
 
@@ -63,14 +67,19 @@ def main(args: argparse.Namespace, use_wandb: bool):
 
     analyzer = WandBLogger(activated=use_wandb)
 
-    train_dataset, test_dataset = train_test_split(
-        df, test_size=0.1, random_state=args.seed, shuffle=True
+    test_dataset_size = int(0.1 * len(df))
+    train_dataset_size = len(df) - test_dataset_size
+
+    train_dataset, test_dataset = torch.utils.data.random_split(
+        df,
+        [train_dataset_size, test_dataset_size],
+        generator=torch.Generator().manual_seed(args.seed),
     )
 
-    train_loader = pyg.loader.DataLoader(
+    train_loader = pyg.data.DataLoader(
         train_dataset, batch_size=20, shuffle=True, pin_memory=True
     )
-    test_loader = pyg.loader.DataLoader(
+    test_loader = pyg.data.DataLoader(
         test_dataset, batch_size=20, shuffle=False, pin_memory=True
     )
 
