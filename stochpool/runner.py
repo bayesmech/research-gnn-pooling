@@ -1,5 +1,6 @@
+import argparse
+
 from sklearn.model_selection import train_test_split
-import typing
 import torch
 import torch_geometric as pyg
 
@@ -10,7 +11,7 @@ from stochpool.analyzers.wandb import WandBLogger
 from stochpool.models.stoch_pool import StochPooledConvolutionalNetwork
 
 
-def main(args: typing.Dict[str, typing.Any], use_wandb: bool):
+def main(args: argparse.Namespace, use_wandb: bool):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     if args.dataset == "proteins":
@@ -55,16 +56,23 @@ def main(args: typing.Dict[str, typing.Any], use_wandb: bool):
         model = StochPooledConvolutionalNetwork(df.num_features, df.num_classes).to(
             device
         )
+    else:
+        raise NotImplementedError("This model is not supported.")
 
     optimizer = torch.optim.Adam(model.parameters(), lr=5e-4, weight_decay=1e-4)
 
     analyzer = WandBLogger(activated=use_wandb)
 
-    train_dataset, test_dataset = train_test_split(df, test_size=0.1, random_state=args.seed, shuffle=True)
+    train_dataset, test_dataset = train_test_split(
+        df, test_size=0.1, random_state=args.seed, shuffle=True
+    )
 
-    train_loader = pyg.loader.DataLoader(train_dataset, batch_size=20, shuffle=True, pin_memory=True)
-    test_loader = pyg.loader.DataLoader(test_dataset, batch_size=20, shuffle=False, pin_memory=True)
-
+    train_loader = pyg.loader.DataLoader(
+        train_dataset, batch_size=20, shuffle=True, pin_memory=True
+    )
+    test_loader = pyg.loader.DataLoader(
+        test_dataset, batch_size=20, shuffle=False, pin_memory=True
+    )
 
     train_graph_classification_inductive(
         train_loader=train_loader,
@@ -76,5 +84,5 @@ def main(args: typing.Dict[str, typing.Any], use_wandb: bool):
         epochs=args.epochs,
         per_batch_iters=args.per_batch_iters,
         accumulate_grad_batches=args.accumulate_grad_batches,
-        seed=args.seed
+        seed=args.seed,
     )

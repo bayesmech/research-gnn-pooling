@@ -4,7 +4,6 @@ import wandb
 
 from stochpool.runner import main
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -21,7 +20,7 @@ if __name__ == "__main__":
         "--epochs", default=200, type=int, help="number of epochs to train for"
     )
     parser.add_argument(
-        "--wandb",
+        "--no-wandb",
         action="store_const",
         default=False,
         const=True,
@@ -31,10 +30,10 @@ if __name__ == "__main__":
         "--per-batch-iters",
         default=1,
         type=int,
-        help="Number of iterations for which to accumulate gradient of a single batch"
+        help="Number of iterations for which to accumulate gradient of a single batch",
     )
     parser.add_argument(
-        "--accumulate_grad_batches",
+        "--accumulate-grad-batches",
         default=1,
         type=int,
         help="Number of batches to accumulate gradients over",
@@ -43,20 +42,18 @@ if __name__ == "__main__":
         "--seed",
         default=42,
         type=int,
-        help="Seed for everything including datasets shuffle"
+        help="Seed for everything including datasets shuffle",
     )
     args = parser.parse_args()
+    args.wandb = not args.no_wandb
 
     if args.wandb:
         wandb.init(
             project="gnn-stochpool",
             name="gnn-stochpool-run",
             save_code=False,
-            config=dict(
-                dataset=args.dataset,
-                model=args.model,
-                epochs=args.epochs,
-            ),
             resume=False,
         )
+        wandb.config.update(args)
+
     main(args, use_wandb=args.wandb)

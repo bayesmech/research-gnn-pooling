@@ -1,4 +1,4 @@
-program: "stochpool/sweep.py"
+program: "stochpool/__main__.py"
 entity: "animeshsinha1309"
 project: "gnn-pooling"
 method: grid
@@ -7,8 +7,8 @@ metric:
   name: "val_loss"
 parameters:
   model:
-    values: ["diffpool", "mincutpool"]
+    values: ["diffpool", "mincutpool", "stochpool"]
   dataset:
     values: ["proteins", "enzymes", "nci1", "nci109"]
   epochs:
-    values: [20]
+    value: 20
