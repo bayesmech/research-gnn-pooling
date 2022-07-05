@@ -21,7 +21,9 @@ class GraphPooledConvolutionalNetwork(torch.nn.Module):
             return x
 
     class ResidualBlockPoolStack(torch.nn.Module):
-        def __init__(self, input_channel: int, channels: int, pool_after: int, n_clusters: int):
+        def __init__(
+            self, input_channel: int, channels: int, pool_after: int, n_clusters: int
+        ):
             super().__init__()
 
             self.input_block = GraphPooledConvolutionalNetwork.ResidualBlock(
@@ -40,20 +42,32 @@ class GraphPooledConvolutionalNetwork(torch.nn.Module):
                 )
             )
 
-        def forward(self, x: torch.Tensor, edge_index: torch.Tensor, batch_ptr: torch.Tensor, edge_weight: typing.Optional[torch.Tensor]):
+        def forward(
+            self,
+            x: torch.Tensor,
+            edge_index: torch.Tensor,
+            batch_ptr: torch.Tensor,
+            edge_weight: typing.Optional[torch.Tensor],
+        ):
             x = self.input_block(x, edge_index)
-            
+
             for i in range(len(self.res_blocks)):
-                x += self.res_blocks[i](x, edge_index)
+                x = x + self.res_blocks[i](x, edge_index)
 
             return self.pool(x, edge_index, batch_ptr, edge_weight)
 
-
-    def __init__(self, in_channels: int, out_channels: int, conv_channels: typing.Tuple[int], n_clusters: typing.Tuple[int], pool_after: int = 2):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        conv_channels: typing.Tuple[int],
+        n_clusters: typing.Tuple[int],
+        pool_after: int = 2,
+    ):
         """
 
         :param conv_channels: List of (input_channels, hidden_channels, output_channels)
-                    
+
         """
         super().__init__()
 
@@ -62,10 +76,10 @@ class GraphPooledConvolutionalNetwork(torch.nn.Module):
         for it in range(len(conv_channels)):
             self.res_blocks.append(
                 GraphPooledConvolutionalNetwork.ResidualBlockPoolStack(
-                    input_channel=in_channels if it == 0 else conv_channels[it-1],
+                    input_channel=in_channels if it == 0 else conv_channels[it - 1],
                     channels=conv_channels[it],
                     pool_after=pool_after,
-                    n_clusters=n_clusters[it]
+                    n_clusters=n_clusters[it],
                 )
             )
 
@@ -77,13 +91,24 @@ class GraphPooledConvolutionalNetwork(torch.nn.Module):
         edge_weight = None
 
         for i in range(len(self.res_blocks)):
-            x, edge_index, edge_weight, link_loss, entropy_loss, batch, batch_ptr = self.res_blocks[i](x, edge_index, batch_ptr, edge_weight)
+            (
+                x,
+                edge_index,
+                edge_weight,
+                link_loss,
+                entropy_loss,
+                batch,
+                batch_ptr,
+            ) = self.res_blocks[i](x, edge_index, batch_ptr, edge_weight)
 
-            total_entropy_loss += entropy_loss
-            total_link_loss += link_loss
+            total_entropy_loss = total_entropy_loss + entropy_loss
+            total_link_loss = total_link_loss + link_loss
 
         x = pyg.nn.global_mean_pool(x, batch)
-        
+
         x = self.lin(x)
 
-        return torch.nn.functional.log_softmax(x, dim=1), total_entropy_loss + total_link_loss 
+        return (
+            torch.nn.functional.log_softmax(x, dim=1),
+            total_entropy_loss + total_link_loss,
+        )

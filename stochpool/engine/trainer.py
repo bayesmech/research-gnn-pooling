@@ -56,10 +56,10 @@ def train_graph_classification_inductive(
                     classification_loss = torch.nn.functional.nll_loss(
                         pred, data.y.view(-1)
                     )
-                    loss = classification_loss + additional_loss
+                    loss = (classification_loss + additional_loss) / per_batch_iters
                     loss.backward()
 
-                    iter_loss.update(loss.item(), n=1)
+                    iter_loss.update(per_batch_iters * loss.item(), n=1)
                     iter_pred.update(pred.detach(), n=1)
 
                     iter_classification_loss.update(classification_loss.item(), n=1)
@@ -117,9 +117,9 @@ def train_graph_classification_inductive(
                         classification_loss = torch.nn.functional.nll_loss(
                             pred, data.y.view(-1)
                         )
-                        loss = classification_loss + additional_loss
+                        loss = (classification_loss + additional_loss) / per_batch_iters
 
-                        iter_loss.update(loss.item(), n=1)
+                        iter_loss.update(per_batch_iters * loss.item(), n=1)
                         iter_pred.update(pred.detach(), n=1)
 
                         iter_additional_loss.update(additional_loss.item(), n=1)
