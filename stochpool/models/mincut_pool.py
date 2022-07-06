@@ -13,7 +13,7 @@ class MinCutPooledConvolutionalNetwork(torch.nn.Module):
         self.lin1 = torch.nn.Linear(hidden_channels, hidden_channels)
         self.lin2 = torch.nn.Linear(hidden_channels, out_channels)
 
-    def forward(self, x, edge_index, batch):
+    def forward(self, x, edge_index, batch, _batch_ptr):
         # Initial convolutions
         x = self.conv1(x, edge_index).relu()
         x, mask = pyg.utils.to_dense_batch(x, batch)
