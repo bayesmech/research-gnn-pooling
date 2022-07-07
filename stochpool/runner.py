@@ -80,7 +80,7 @@ def main(args: argparse.Namespace, use_wandb: bool):
 
     analyzer = WandBLogger(activated=use_wandb)
 
-    test_dataset_size = int(0.1 * len(df))
+    test_dataset_size = int(0.225 * len(df))
     train_dataset_size = len(df) - test_dataset_size
 
     train_dataset, test_dataset = torch.utils.data.random_split(
@@ -90,10 +90,10 @@ def main(args: argparse.Namespace, use_wandb: bool):
     )
 
     train_loader = pyg.data.DataLoader(
-        train_dataset, batch_size=1, shuffle=True, pin_memory=False
+        train_dataset, batch_size=64, shuffle=True, pin_memory=True
     )
     test_loader = pyg.data.DataLoader(
-        test_dataset, batch_size=1, shuffle=False, pin_memory=False
+        test_dataset, batch_size=64, shuffle=False, pin_memory=True
     )
 
     train_graph_classification_inductive(

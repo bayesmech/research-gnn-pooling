@@ -21,12 +21,12 @@ class DiffPooledConvolutionalNetwork(torch.nn.Module):
         def __init__(self, in_channels: int, out_channels: int):
             super(DiffPooledConvolutionalNetwork.ResidualBlock, self).__init__()
             self.conv = pyg.nn.DenseGCNConv(in_channels, out_channels)
-            self.bn = pyg.nn.BatchNorm(out_channels)
+            self.bn = torch.nn.BatchNorm1d(out_channels)
             self.activation = torch.nn.SiLU()
 
         def forward(self, x: torch.Tensor, adj: torch.Tensor) -> torch.Tensor:
             x = self.conv(x, adj)
-            x = self.bn(x)
+            x = self.bn(x.permute(0, 2, 1)).permute(0, 2, 1)
             x = self.activation(x)
             return x
 
@@ -101,16 +101,16 @@ class DiffPooledConvolutionalNetwork(torch.nn.Module):
         mask = mask.view(batch_size, num_nodes, 1).to(x.dtype)
         x = x * mask
 
-        total_link_loss = torch.tensor(0.0)
-        total_entropy_loss = torch.tensor(0.0)
+        total_link_loss = torch.tensor(0.0, device=x.device)
+        total_entropy_loss = torch.tensor(0.0, device=x.device)
         for i in range(len(self.res_blocks)):
             (x, adj, link_loss, entropy_loss,) = self.res_blocks[
                 i
             ](x, adj)
-            total_link_loss += link_loss
-            total_entropy_loss += entropy_loss
+            total_link_loss = total_link_loss + link_loss
+            total_entropy_loss = total_entropy_loss +  entropy_loss
 
-        x = pyg.nn.global_mean_pool(x, batch)
+        x = x.mean(dim=1)
 
         x = self.lin(x)
 

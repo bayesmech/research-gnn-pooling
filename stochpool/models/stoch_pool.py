@@ -107,5 +107,5 @@ class StochPooledConvolutionalNetwork(torch.nn.Module):
 
         return (
             torch.nn.functional.log_softmax(x, dim=1),
-            total_entropy_loss + total_link_loss,
+            0 * total_entropy_loss + 0 * total_link_loss,
         )
