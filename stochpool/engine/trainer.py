@@ -18,7 +18,6 @@ def train_graph_classification_inductive(
     analyzer: WandBLogger,
     per_batch_iters: int,
     accumulate_grad_batches: int,
-    seed: int,
 ):
 
     optimizer.zero_grad()

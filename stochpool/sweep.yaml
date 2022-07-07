@@ -1,6 +1,6 @@
 program: "stochpool/__main__.py"
-entity: "animeshsinha1309"
-project: "gnn-pooling"
+entity: "bayesmech"
+project: "research-gnn-pooling"
 method: grid
 metric:
   goal: minimize
@@ -11,4 +11,4 @@ parameters:
   dataset:
     values: ["proteins", "enzymes", "nci1", "nci109"]
   epochs:
-    value: 20
+    value: 200

@@ -1,14 +1,15 @@
 import argparse
 
-from sklearn.model_selection import train_test_split
-import torch
+import torch, torch.utils.data
 import torch_geometric as pyg
 
 from stochpool.engine.trainer import train_graph_classification_inductive
+from stochpool.analyzers.wandb import WandBLogger
+
+from stochpool.models.stoch_pool import StochPooledConvolutionalNetwork
 from stochpool.models.mincut_pool import MinCutPooledConvolutionalNetwork
 from stochpool.models.diff_pool import DiffPooledConvolutionalNetwork
-from stochpool.analyzers.wandb import WandBLogger
-from stochpool.models.stoch_pool import GraphPooledConvolutionalNetwork
+from stochpool.models.asap_pool import ASAPooledConvolutionalNetwork
 
 
 def main(args: argparse.Namespace, use_wandb: bool):
@@ -45,19 +46,31 @@ def main(args: argparse.Namespace, use_wandb: bool):
         )
 
     if args.model == "diffpool":
-        model = DiffPooledConvolutionalNetwork(df.num_features, df.num_classes).to(
-            device
-        )
+        model = DiffPooledConvolutionalNetwork(
+            in_channels=df.num_features,
+            out_channels=df.num_classes,
+            conv_channels=(8, 16, 32),
+            n_clusters=(20, 10, 5),
+            pool_after=2,
+        ).to(device)
     elif args.model == "mincutpool":
         model = MinCutPooledConvolutionalNetwork(df.num_features, df.num_classes).to(
             device
         )
     elif args.model == "stochpool":
-        model = GraphPooledConvolutionalNetwork(
+        model = StochPooledConvolutionalNetwork(
             in_channels=df.num_features,
             out_channels=df.num_classes,
-            conv_channels=[8, 16, 32],
-            n_clusters=[20, 10, 5],
+            conv_channels=(8, 16, 32),
+            n_clusters=(20, 10, 5),
+            pool_after=2,
+        ).to(device)
+    elif args.model == "asapool":
+        model = ASAPooledConvolutionalNetwork(
+            in_channels=df.num_features,
+            out_channels=df.num_classes,
+            conv_channels=(8, 16, 32),
+            n_clusters=(20, 10, 5),
             pool_after=2,
         ).to(device)
     else:
@@ -77,10 +90,10 @@ def main(args: argparse.Namespace, use_wandb: bool):
     )
 
     train_loader = pyg.data.DataLoader(
-        train_dataset, batch_size=20, shuffle=True, pin_memory=True
+        train_dataset, batch_size=1, shuffle=True, pin_memory=False
     )
     test_loader = pyg.data.DataLoader(
-        test_dataset, batch_size=20, shuffle=False, pin_memory=True
+        test_dataset, batch_size=1, shuffle=False, pin_memory=False
     )
 
     train_graph_classification_inductive(
@@ -93,5 +106,4 @@ def main(args: argparse.Namespace, use_wandb: bool):
         epochs=args.epochs,
         per_batch_iters=args.per_batch_iters,
         accumulate_grad_batches=args.accumulate_grad_batches,
-        seed=args.seed,
     )
