@@ -49,8 +49,9 @@ if __name__ == "__main__":
 
     if args.wandb:
         wandb.init(
-            project="gnn-stochpool",
-            name="gnn-stochpool-run",
+            project="research-gnn-pooling",
+            entity="bayesmech",
+            name=f"gnn-{args.model}-{args.dataset}",
             save_code=False,
             resume=False,
         )

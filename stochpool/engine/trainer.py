@@ -1,5 +1,3 @@
-import typing
-
 import tqdm.auto as tqdm
 import torch_geometric as pyg
 import torch, torch.nn.functional
@@ -22,7 +20,7 @@ def train_graph_classification_inductive(
 
     optimizer.zero_grad()
     global_step = 0
-    for epoch in range(epochs):
+    for epoch in range(1, epochs + 1):
         model.train()
 
         accuracy_all = AverageMeter()

@@ -7,8 +7,8 @@ metric:
   name: "val_loss"
 parameters:
   model:
-    values: ["diffpool", "mincutpool", "stochpool"]
+    values: ["stochpool", "diffpool", "asapool"]
   dataset:
     values: ["proteins", "enzymes", "nci1", "nci109"]
   epochs:
-    value: 200
+    value: 1000

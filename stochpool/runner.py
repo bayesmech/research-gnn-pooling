@@ -80,7 +80,7 @@ def main(args: argparse.Namespace, use_wandb: bool):
 
     analyzer = WandBLogger(activated=use_wandb)
 
-    test_dataset_size = int(0.225 * len(df))
+    test_dataset_size = int(0.25 * len(df))
     train_dataset_size = len(df) - test_dataset_size
 
     train_dataset, test_dataset = torch.utils.data.random_split(
