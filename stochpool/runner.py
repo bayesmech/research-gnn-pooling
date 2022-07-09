@@ -49,8 +49,8 @@ def main(args: argparse.Namespace, use_wandb: bool):
         model = DiffPooledConvolutionalNetwork(
             in_channels=df.num_features,
             out_channels=df.num_classes,
-            conv_channels=(32,),
-            n_clusters=(10,),
+            conv_channels=(8, 8, 16, 16, 32,),
+            n_clusters=(20, 16, 12, 8, 5,),
             pool_after=2,
         ).to(device)
     elif args.model == "mincutpool":
@@ -61,16 +61,16 @@ def main(args: argparse.Namespace, use_wandb: bool):
         model = StochPooledConvolutionalNetwork(
             in_channels=df.num_features,
             out_channels=df.num_classes,
-            conv_channels=(32,),
-            n_clusters=(10,),
+            conv_channels=(8, 8, 16, 16, 32,),
+            n_clusters=(20, 16, 12, 8, 5,),
             pool_after=2,
         ).to(device)
     elif args.model == "asapool":
         model = ASAPooledConvolutionalNetwork(
             in_channels=df.num_features,
             out_channels=df.num_classes,
-            conv_channels=(32,),
-            n_clusters=(10,),
+            conv_channels=(8, 8, 16, 16, 32,),
+            n_clusters=(20, 16, 12, 8, 5,),
             pool_after=2,
         ).to(device)
     else:
