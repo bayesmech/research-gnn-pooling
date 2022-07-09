@@ -4,7 +4,7 @@ project: "research-gnn-pooling"
 method: grid
 metric:
   goal: minimize
-  name: "val_loss"
+  name: "val_classification_loss"
 parameters:
   model:
     values: ["stochpool", "diffpool", "asapool"]
