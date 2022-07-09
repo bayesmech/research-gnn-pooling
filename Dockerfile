@@ -4,8 +4,11 @@ WORKDIR /usr/work/research-gnn-poooling
 COPY stochpool stochpool
 COPY datasets datasets
 
-RUN python -m pip install torch-scatter torch-sparse torch-cluster torch-spline-conv  \
-    torch-geometric -f https://data.pyg.org/whl/torch-1.11.0+cpu.html
-RUN python -m pip install -r requirements.txt
+RUN pip install torch-scatter -f https://data.pyg.org/whl/torch-1.12.0+cu116.html
+RUN pip install torch-sparse -f https://data.pyg.org/whl/torch-1.12.0+cu116.html
+RUN pip install torch-geometric
+RUN python -m pip install tqdm
+RUN python -m pip install wandb
 
-CMD python -m stochpool --model stochpool --dataset proteins --epochs 2
+ENV PYTHONPATH="/usr/work/research-gnn-poooling"
+ENV WANDB_API_KEY="0cc84f7b0a7b22052b6ddc033a3128a589005f79"
