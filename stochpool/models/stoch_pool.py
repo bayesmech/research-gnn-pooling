@@ -48,6 +48,7 @@ class StochPooledConvolutionalNetwork(torch.nn.Module):
             self,
             x: torch.Tensor,
             edge_index: torch.Tensor,
+            batch: torch.Tensor,
             batch_ptr: torch.Tensor,
             edge_weight: typing.Optional[torch.Tensor],
         ):
@@ -56,7 +57,7 @@ class StochPooledConvolutionalNetwork(torch.nn.Module):
             for i in range(len(self.res_blocks)):
                 x = x + self.res_blocks[i](x, edge_index)
 
-            return self.pool(x, edge_index, batch_ptr, edge_weight)
+            return self.pool(x, edge_index, batch, batch_ptr, edge_weight)
 
     def __init__(
         self,
@@ -96,7 +97,7 @@ class StochPooledConvolutionalNetwork(torch.nn.Module):
                 entropy_loss,
                 batch,
                 batch_ptr,
-            ) = self.res_blocks[i](x, edge_index, batch_ptr, edge_weight)
+            ) = self.res_blocks[i](x, edge_index, batch, batch_ptr, edge_weight)
 
             total_entropy_loss = total_entropy_loss + entropy_loss
             total_link_loss = total_link_loss + link_loss

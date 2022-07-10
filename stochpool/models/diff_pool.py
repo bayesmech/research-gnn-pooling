@@ -108,7 +108,7 @@ class DiffPooledConvolutionalNetwork(torch.nn.Module):
                 i
             ](x, adj)
             total_link_loss = total_link_loss + link_loss
-            total_entropy_loss = total_entropy_loss +  entropy_loss
+            total_entropy_loss = total_entropy_loss + entropy_loss
 
         x = x.mean(dim=1)
 

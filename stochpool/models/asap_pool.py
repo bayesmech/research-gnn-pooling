@@ -55,7 +55,9 @@ class ASAPooledConvolutionalNetwork(torch.nn.Module):
             for i in range(len(self.res_blocks)):
                 x = x + self.res_blocks[i](x, edge_index)
 
-            return self.pool(x=x, edge_index=edge_index, edge_weight=edge_weight, batch=batch)
+            return self.pool(
+                x=x, edge_index=edge_index, edge_weight=edge_weight, batch=batch
+            )
 
     def __init__(
         self,
