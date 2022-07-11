@@ -40,7 +40,14 @@ class StochPool(torch.nn.Module):
             x, edge_index
         )  # tensor of shape (num_nodes_in_batched_graph, num_output_pools)
         num_pools_per_graph = s.size(1)
-        s = torch.nn.functional.gumbel_softmax(s, hard=True, dim=-1)
+
+        # s = torch.nn.functional.gumbel_softmax(s, hard=True, dim=-1)
+        s = torch.nn.functional.softmax(s, dim=-1)
+        main_idx = torch.argmax(s, -1, keepdim=True)
+        one_hot = torch.zeros_like(s)
+        one_hot.scatter_(-1, main_idx, 1)
+        s = one_hot - s.detach() + s
+
         edge_weight = (
             edge_weight
             if edge_weight is not None

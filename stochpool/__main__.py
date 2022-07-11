@@ -51,7 +51,7 @@ if __name__ == "__main__":
         wandb.init(
             project="research-gnn-pooling",
             entity="bayesmech",
-            name=f"gnn-{args.model}-{args.dataset}",
+            name=f"softmax-stochpool",
             save_code=False,
             resume=False,
         )

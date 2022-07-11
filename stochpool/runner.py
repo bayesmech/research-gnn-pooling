@@ -13,7 +13,7 @@ from stochpool.models.asap_pool import ASAPooledConvolutionalNetwork
 
 
 def main(args: argparse.Namespace, use_wandb: bool):
-    device = torch.device("cuda")
+    device = torch.device("cpu")
 
     if args.dataset == "proteins":
         df = pyg.datasets.TUDataset(
