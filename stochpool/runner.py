@@ -50,11 +50,11 @@ def main(args: argparse.Namespace, use_wandb: bool):
             in_channels=df.num_features,
             out_channels=df.num_classes,
             conv_channels=(
-                8,
-                8,
-                16,
-                16,
                 32,
+                32,
+                64,
+                64,
+                128,
             ),
             n_clusters=(
                 20,
@@ -74,11 +74,11 @@ def main(args: argparse.Namespace, use_wandb: bool):
             in_channels=df.num_features,
             out_channels=df.num_classes,
             conv_channels=(
-                8,
-                8,
-                16,
-                16,
                 32,
+                32,
+                64,
+                64,
+                128,
             ),
             n_clusters=(
                 20,
@@ -94,11 +94,11 @@ def main(args: argparse.Namespace, use_wandb: bool):
             in_channels=df.num_features,
             out_channels=df.num_classes,
             conv_channels=(
-                8,
-                8,
-                16,
-                16,
                 32,
+                32,
+                64,
+                64,
+                128,
             ),
             n_clusters=(
                 20,
