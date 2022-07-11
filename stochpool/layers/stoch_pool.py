@@ -2,6 +2,8 @@ import typing
 
 import torch, torch.nn.functional
 
+from stochpool.utils.param_scheduler import HyperParameter
+
 
 class StochPool(torch.nn.Module):
     def __init__(self, pooling_net):
@@ -14,6 +16,7 @@ class StochPool(torch.nn.Module):
         edge_index: torch.Tensor,
         batch: torch.Tensor,
         batch_ptr: torch.Tensor,
+        tau: HyperParameter,
         edge_weight: typing.Optional[torch.Tensor] = None,
         normalize: typing.Optional[bool] = True,
     ) -> typing.Tuple[
@@ -31,6 +34,7 @@ class StochPool(torch.nn.Module):
         :param edge_index: tensor of shape (2, num_edges_in_batched_graph)
         :param edge_weight: tensor of shape (num_edges_in_batched_graph,)
         :param batch: tensor of shape (num_nodes,)
+        :param tau: temperature for gumbel softmax, as a hyperparameter
         :param batch_ptr: tensor of shape (num_batches,)
         :param normalize: boolean for normalizing the link loss
         :return:
@@ -41,12 +45,7 @@ class StochPool(torch.nn.Module):
         )  # tensor of shape (num_nodes_in_batched_graph, num_output_pools)
         num_pools_per_graph = s.size(1)
 
-        # s = torch.nn.functional.gumbel_softmax(s, hard=True, dim=-1)
-        s = torch.nn.functional.softmax(s, dim=-1)
-        main_idx = torch.argmax(s, -1, keepdim=True)
-        one_hot = torch.zeros_like(s)
-        one_hot.scatter_(-1, main_idx, 1)
-        s = one_hot - s.detach() + s
+        s = torch.nn.functional.gumbel_softmax(s, hard=True, dim=-1, tau=tau.value)
 
         edge_weight = (
             edge_weight

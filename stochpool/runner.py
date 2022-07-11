@@ -10,6 +10,7 @@ from stochpool.models.stoch_pool import StochPooledConvolutionalNetwork
 from stochpool.models.mincut_pool import MinCutPooledConvolutionalNetwork
 from stochpool.models.diff_pool import DiffPooledConvolutionalNetwork
 from stochpool.models.asap_pool import ASAPooledConvolutionalNetwork
+from stochpool.utils.param_scheduler import ExponentiallyDecayingHyperParameter
 
 
 def main(args: argparse.Namespace, use_wandb: bool):
@@ -45,6 +46,7 @@ def main(args: argparse.Namespace, use_wandb: bool):
             "This dataset has been been added to the CurvGN pipeline."
         )
 
+    hyper_parameters = []
     if args.model == "diffpool":
         model = DiffPooledConvolutionalNetwork(
             in_channels=df.num_features,
@@ -70,6 +72,8 @@ def main(args: argparse.Namespace, use_wandb: bool):
             device
         )
     elif args.model == "stochpool":
+        tau = ExponentiallyDecayingHyperParameter(name="tau", value=10., exp_multiplier=4e-3, lowest_value=0.5)
+        hyper_parameters.append(tau)
         model = StochPooledConvolutionalNetwork(
             in_channels=df.num_features,
             out_channels=df.num_classes,
@@ -88,6 +92,7 @@ def main(args: argparse.Namespace, use_wandb: bool):
                 5,
             ),
             pool_after=2,
+            tau=tau,
         ).to(device)
     elif args.model == "asapool":
         model = ASAPooledConvolutionalNetwork(
@@ -151,4 +156,5 @@ def main(args: argparse.Namespace, use_wandb: bool):
         per_batch_iters=args.per_batch_iters,
         accumulate_grad_batches=args.accumulate_grad_batches,
         name=f"gnn-{args.model}-{args.dataset}",
+        hyper_parameters=hyper_parameters
     )

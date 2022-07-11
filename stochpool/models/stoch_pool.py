@@ -4,6 +4,7 @@ import torch, torch.nn.functional
 import torch_geometric as pyg
 
 from stochpool.layers.stoch_pool import StochPool
+from stochpool.utils.param_scheduler import HyperParameter, StaticHyperParameter
 
 
 class StochPooledConvolutionalNetwork(torch.nn.Module):
@@ -51,13 +52,14 @@ class StochPooledConvolutionalNetwork(torch.nn.Module):
             batch: torch.Tensor,
             batch_ptr: torch.Tensor,
             edge_weight: typing.Optional[torch.Tensor],
+            tau: HyperParameter,
         ):
             x = self.input_block(x, edge_index)
 
             for i in range(len(self.res_blocks)):
                 x = x + self.res_blocks[i](x, edge_index)
 
-            return self.pool(x, edge_index, batch, batch_ptr, edge_weight)
+            return self.pool(x, edge_index, batch, batch_ptr=batch_ptr, edge_weight=edge_weight, tau=tau)
 
     def __init__(
         self,
@@ -66,8 +68,10 @@ class StochPooledConvolutionalNetwork(torch.nn.Module):
         conv_channels: typing.Tuple[int, ...],
         n_clusters: typing.Tuple[int, ...],
         pool_after: int = 2,
+        tau: HyperParameter = StaticHyperParameter("tau", 1.0),
     ):
         super().__init__()
+        self.tau = tau
 
         self.res_blocks = torch.nn.ModuleList()
 
@@ -97,7 +101,7 @@ class StochPooledConvolutionalNetwork(torch.nn.Module):
                 entropy_loss,
                 batch,
                 batch_ptr,
-            ) = self.res_blocks[i](x, edge_index, batch, batch_ptr, edge_weight)
+            ) = self.res_blocks[i](x, edge_index, batch, batch_ptr, edge_weight, tau=self.tau)
 
             total_entropy_loss = total_entropy_loss + entropy_loss
             total_link_loss = total_link_loss + link_loss
