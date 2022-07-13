@@ -6,6 +6,7 @@ import torch, torch.nn.functional
 
 from stochpool.analyzers.wandb import WandBLogger
 from stochpool.utils.train_utils import AverageMeter
+from stochpool.utils.param_scheduler import HyperParameter
 
 
 def train_graph_classification_inductive(
@@ -18,12 +19,18 @@ def train_graph_classification_inductive(
     analyzer: WandBLogger,
     per_batch_iters: int,
     accumulate_grad_batches: int,
-    seed: int,
+    name: str,
+    hyper_parameters: typing.List[HyperParameter],
 ):
 
     optimizer.zero_grad()
     global_step = 0
-    for epoch in range(epochs):
+    best_validation_classification_loss = float("inf")
+
+    for epoch in range(1, epochs + 1):
+        for hyper_parameter in hyper_parameters:
+            hyper_parameter(epoch - 1)
+
         model.train()
 
         accuracy_all = AverageMeter()
@@ -85,9 +92,6 @@ def train_graph_classification_inductive(
 
                 iterator.set_postfix(loss=loss_all.avg, accuracy=accuracy_all.avg)
 
-        train_loss = loss_all.avg
-        train_acc = accuracy_all.avg
-
         val_accuracy_all = AverageMeter()
         val_loss_all = AverageMeter()
         val_classification_loss_all = AverageMeter()
@@ -148,18 +152,21 @@ def train_graph_classification_inductive(
                         loss=val_loss_all.avg, accuracy=val_accuracy_all.avg
                     )
 
-        val_loss = val_loss_all.avg
-        val_acc = val_accuracy_all.avg
+        val_classification_loss = val_classification_loss_all.avg
+        if best_validation_classification_loss < val_classification_loss:
+            torch.save(model.state_dict(), f"weights/model_{name}.pt")
+            best_validation_classification_loss = val_classification_loss
 
-        analyzer.log(
-            {
-                "train_acc": train_acc,
-                "train_loss": train_loss,
-                "train_classification_loss": classification_loss_all.avg,
-                "train_additional_loss": additional_loss_all.avg,
-                "val_acc": val_acc,
-                "val_loss": val_loss,
-                "val_classification_loss": val_classification_loss_all.avg,
-                "val_additional_loss": val_additional_loss_all.avg,
-            }
-        )
+        loggable_items = {
+            "train_acc": accuracy_all.avg,
+            "train_loss": loss_all.avg,
+            "train_classification_loss": classification_loss_all.avg,
+            "train_additional_loss": additional_loss_all.avg,
+            "val_acc": val_accuracy_all.avg,
+            "val_loss": val_loss_all.avg,
+            "val_classification_loss": val_classification_loss,
+            "val_additional_loss": val_additional_loss_all.avg,
+        }
+        for hyper_parameter in hyper_parameters:
+            loggable_items[hyper_parameter.name] = hyper_parameter.value
+        analyzer.log(loggable_items)

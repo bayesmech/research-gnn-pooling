@@ -7,9 +7,9 @@ class MinCutPooledConvolutionalNetwork(torch.nn.Module):
         super().__init__()
         self.conv1 = pyg.nn.GCNConv(in_channels, hidden_channels)
         self.pool1 = torch.nn.Linear(hidden_channels, 100)
-        self.conv2 = pyg.nn.DenseGraphConv(hidden_channels, hidden_channels)
+        self.conv2 = pyg.nn.DenseGCNConv(hidden_channels, hidden_channels)
         self.pool2 = torch.nn.Linear(hidden_channels, 10)
-        self.conv3 = pyg.nn.DenseGraphConv(hidden_channels, hidden_channels)
+        self.conv3 = pyg.nn.DenseGCNConv(hidden_channels, hidden_channels)
         self.lin1 = torch.nn.Linear(hidden_channels, hidden_channels)
         self.lin2 = torch.nn.Linear(hidden_channels, out_channels)
 
